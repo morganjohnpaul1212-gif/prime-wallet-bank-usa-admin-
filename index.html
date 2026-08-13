@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="google-site-verification" content="g9v8im8X19-iUEDczexVSuwdEJYl1NxOmYTac_Zo" />
+    <title>Admin Panel - Prime Wallet Bank</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
+        :root {
+            --prime-blue: #0047AB; --prime-dark: #002D6D; --prime-gold: #FFB900;
+            --light-gray: #F5F7FA; --border-gray: #E0E0E0;
+            --success: #2E7D32; --danger: #C62828; --white: #FFFFFF;
+        }
+        body { background-color: var(--light-gray); }
+        .header { background: var(--prime-dark); color: white; padding: 1.5rem; text-align: center; }
+        .container { max-width: 1200px; margin: 2rem auto; padding: 0 1rem; }
+        .card { background: white; border-radius: 12px; padding: 2rem; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-bottom: 2rem; }
+        .btn { padding: 0.7rem 1.2rem; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
+        .btn-primary { background-color: var(--prime-blue); color: white; }
+        .btn-success { background-color: var(--success); color: white; }
+        .btn-danger { background-color: var(--danger); color: white; }
+        .hidden { display: none; }
+        .form-group { margin-bottom: 1rem; }
+        label { display: block; margin-bottom: 0.5rem; font-weight: 500; }
+        input, select, textarea { width: 100%; padding: 0.7rem; border: 1px solid var(--border-gray); border-radius: 4px; font-size: 1rem; }
+        table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+        th, td { padding: 0.8rem; text-align: left; border-bottom: 1px solid var(--border-gray); }
+        th { background-color: var(--light-gray); font-weight: bold; }
+        .alert { padding: 1rem; border-radius: 6px; margin: 1rem 0; text-align: center; }
+        .alert-success { background-color: #E8F5E9; color: var(--success); }
+        .login-container { max-width: 400px; margin: 5rem auto; }
+        .tab-buttons { display: flex; border-bottom: 1px solid var(--border-gray); margin-bottom: 1.5rem; }
+        .tab-btn { padding: 0.8rem 1.5rem; background: none; border: none; cursor: pointer; font-weight: bold; color: #666; }
+        .tab-btn.active { color: var(--prime-blue); border-bottom: 2px solid var(--prime-blue); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .user-card { border: 1px solid var(--border-gray); border-radius: 8px; padding: 1rem; margin: 1rem 0; }
+    </style>
+</head>
+<body>
+    <!-- Admin Login -->
+    <div id="admin-login" class="login-container card">
+        <h2 style="text-align:center; margin-bottom:1.5rem; color:var(--prime-dark)">Admin Sign In</h2>
+        <form id="admin-login-form">
+            <div class="form-group">
+                <label>Username</label>
+                <input type="text" value="admin" required>
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="admin-password" required>
+            </div>
+            <button type="submit" class="btn btn-primary" style="width:100%">Sign In</button>
+        </form>
+    </div>
+
+    <!-- Admin Dashboard -->
+    <div id="admin-dashboard" class="hidden">
+        <div class="header">
+            <h1>Prime Wallet Bank — Admin Control Panel</h1>
+            <button class="btn btn-danger" style="position:absolute; top:1rem; right:1rem;" onclick="adminLogout()">Sign Out</button>
+        </div>
+        <div class="container">
+            <div class="tab-buttons">
+                <button class="tab-btn active" onclick="showAdminTab('users')">Manage Users</button>
+                <button class="tab-btn" onclick="showAdminTab('cards')">Card Requests</button>
+                <button class="tab-btn" onclick="showAdminTab('funding')">Fund Accounts</button>
+                <button class="tab-btn" onclick="showAdminTab('settings')">Settings</button>
+            </div>
+
+            <!-- Users Tab -->
+            <div id="users" class="tab-content active">
+                <div class="card">
+                    <h2>New Registration Approvals</h2>
+                    <div class="user-card">
+                        <h4>John Doe</h4>
+                        <p>Email: john@example.com | Phone: +1 555-123-4567</p>
+                        <p>Country: United States | ID Type: Driver's License</p>
+                        <p>Status: Pending Approval</p>
+                        <button class="btn btn-success" onclick="approveUser(this)">Approve</button>
+                        <button class="btn btn-danger" onclick="rejectUser(this)">Reject</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card Requests Tab -->
+            <div id="cards" class="tab-content">
+                <div class="card">
+                    <h2>Card Purchase Requests</h2>
+                    <div class="user-card">
+                        <h4>Jane Smith — Prime Wallet Visa ($49.99)</h4>
+                        <p>Payment Method: Uploaded Visa Card ****-****-****-1234 | Exp: 08/27</p>
+                        <p>Status: Pending Verification</p>
+                        <button class="btn btn-success" onclick="approveCard(this)">Approve & Issue PIN</button>
+                        <button class="btn btn-danger" onclick="rejectCard(this)">Reject</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Funding Tab -->
+            <div id="funding" class="tab-content">
+                <div class="card">
+                    <h2>Fund User Account</h2>
+                    <form>
+                        <div class="form-group">
+                            <label>User Email or Account Number</label>
+                            <input type="text" placeholder="Enter user identifier">
+                        </div>
+                        <div class="form-group">
+                            <label>Amount (USD)</label>
+                            <input type="number" step="0.01" placeholder="0.00">
+                        </div>
+                        <div class="form-group">
+                            <label>Transaction Note</label>
+                            <input type="text" placeholder="e.g. Initial deposit">
+                        </div>
+                        <button class="btn btn-primary">Fund Account</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Settings Tab -->
+            <div id="settings" class="tab-content">
+                <div class="card">
+                    <h2>Admin Settings</h2>
+                    <form>
+                        <div class="form-group">
+                            <label>Change Admin Password</label>
+                            <input type="password" placeholder="New Password">
+                        </div>
+                        <div class="form-group">
+                            <label>Confirm New Password</label>
+                            <input type="password" placeholder="Confirm Password">
+                        </div>
+                        <button class="btn btn-primary">Update Password</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('admin-login-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const pwd = document.getElementById('admin-password').value;
+            if (pwd === 'Admin@123') {
+                document.getElementById('admin-login').classList.add('hidden');
+                document.getElementById('admin-dashboard').classList.remove('hidden');
+            } else {
+                alert('Invalid password!');
+            }
+        });
+
+        function adminLogout() {
+            document.getElementById('admin-dashboard').classList.add('hidden');
+            document.getElementById('admin-login').classList.remove('hidden');
+        }
+
+        function showAdminTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function approveUser(btn) {
+            const card = btn.closest('.user-card');
+            card.style.borderLeft = '5px solid #2E7D32';
+            btn.replaceWith('<span style="color:#2E7D32; font-weight:bold;">Approved ✅</span>');
+        }
+
+        function rejectUser(btn) {
+            const card = btn.closest('.user-card');
+            card.style.borderLeft = '5px solid #C62828';
+            btn.replaceWith('<span style="color:#C62828; font-weight:bold;">Rejected ❌</span>');
+        }
+
+        function approveCard(btn) {
+            const card = btn.closest('.user-card');
+            card.style.borderLeft = '5px solid #2E7D32';
+            btn.replaceWith('<span style="color:#2E7D32; font-weight:bold;">Approved — PIN: 4567 ✅</span>');
+        }
+
+        function rejectCard(btn) {
+            const card = btn.closest('.user-card');
+            card.style.borderLeft = '5px solid #C62828';
+            btn.replaceWith('<span style="color:#C62828; font-weight:bold;">Rejected ❌</span>');
+        }
+    </script>
+</body>
+</html>
